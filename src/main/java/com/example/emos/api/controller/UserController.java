@@ -78,7 +78,7 @@ public class UserController {
      */
     @GetMapping("/loadUserInfo")
     @Operation(summary = "登陆成功后加载用户的基本信息")
-    @SaCheckLogin
+    @SaCheckLogin   //登录校验 —— 只有登录之后才能进入该方法。
     public R loadUserInfo() {
         int userId = StpUtil.getLoginIdAsInt();
         HashMap summary = userService.searchUserSummary(userId);
@@ -99,8 +99,9 @@ public class UserController {
         //判断userId是否为空，将值保存到以R为数据类型中
         R r = R.ok().put("result", userId != null ? true : false);
         if (userId != null) {
-            //调用这个方法让浏览器保存token令牌
-            StpUtil.setLoginId(userId);
+            //会话登录，并设置登陆的 userId
+            //StpUtil.setLoginId(userId);
+            StpUtil.login(userId);
             //查询用户的权限列表，将返回的值保存到permission中
             Set<String> permissions = userService.searchUserPermissions(userId);
             /*
@@ -109,7 +110,7 @@ public class UserController {
              * 让前端保存在Storage中，然后每次在Ajax的Header上提交Token
              */
             //获取token值，并将值传递过去
-            //getTokenInfo返回两个一个对象包含两个关键属性：tokenName和tokenValue，下面调用tokenValue
+            //getTokenInfo返回两个,一个对象包含两个关键属性：tokenName和tokenValue，下面调用tokenValue
             String token=StpUtil.getTokenInfo().getTokenValue();
             String password = form.getPassword();
             //往R对象中存放token值和permission的结果

@@ -82,6 +82,7 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--测试 Junit框架-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -132,7 +133,7 @@
             <artifactId>sa-token-spring-boot-starter</artifactId>
             <version>1.26.0</version>
         </dependency>
-        <!--用Redis缓存授权信息-->
+        <!--用sa-token-Redis缓存授权信息-->
         <dependency>
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-dao-redis</artifactId>

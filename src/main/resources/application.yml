@@ -62,7 +62,9 @@ sa-token:
   isReadCookie: true
 
 mybatis:
+  #配置 mapper 的映射文件路径
   mapper-locations: classpath*:mapper/*.xml
+  #用于指定 MyBatis 类型别名的包路径，如自定义的 User 类型别名
   type-aliases-package: com.example.emos.api.db.pojo
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -102,7 +104,7 @@ wx:
 
 emos:
   code: CD78FCBB89586DDA
-  tcode: "755487"
+  tcode: "523680"
   recieveNotify: http://192.168.111.1:8090/emos-api/meeting/recieveNotify
 
 workflow:
