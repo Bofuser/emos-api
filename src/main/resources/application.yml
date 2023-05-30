@@ -103,8 +103,8 @@ wx:
   app-secret: 68baa87b40a37fb96cd35c18200ef6e3
 
 emos:
-  code: CD78FCBB89586DDA
-  tcode: "523680"
+  code: 46B83068776F9BEC
+  tcode: "061547"
   recieveNotify: http://192.168.111.1:8090/emos-api/meeting/recieveNotify
 
 workflow:

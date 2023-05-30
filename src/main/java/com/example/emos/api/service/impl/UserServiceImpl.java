@@ -174,13 +174,13 @@ public class UserServiceImpl implements UserService {
 
         //将数据库中根据条件param参数查询的员工数据保存到list中，list为前端页面的展示条数
         ArrayList<HashMap> list = userDao.searchUserByPage(param);
-        //根据条件param查找的用户总条数count
+        //根据条件param查找的用户总条数count，count 通过数据库查询得到总条数
         long count = userDao.searchUserCount(param);
         int start = (Integer) param.get("start");
         int length = (Integer) param.get("length");
         //将所有的查询数据信息封装成pageUtils返回出去
         PageUtils pageUtils = new PageUtils(list, count, start, length);
-        //pageUtils中有totalCount, pageSize, totalPage, pageIndex, 和list（用户信息）。
+        //pageUtils中有totalCount, pageSize, totalPage, pageIndex, 和 list（用户信息）。
         return pageUtils;
     }
 

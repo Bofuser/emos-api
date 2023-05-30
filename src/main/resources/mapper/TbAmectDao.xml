@@ -11,9 +11,9 @@
                `at`.type,
                a.`status`,
                DATE_FORMAT(a.create_time, '%Y-%m-%d %H:%i') AS createTime,
-               If(a.user_id=#{currentUserId},"true","false") AS mine
+               IF(a.user_id=#{currentUserId},"true","false") AS mine
         FROM tb_amect a
-        JOIN tb_amect_type `at` ON a.type_id = `at.id`
+        JOIN tb_amect_type `at` ON a.type_id = `at`.id
         JOIN tb_user u ON u.id = a.user_id
         JOIN tb_dept d ON u.dept_id = d.id
         WHERE 1=1
@@ -38,9 +38,8 @@
         ORDER BY a.id DESC
         LIMIT #{start}, #{length}
     </select>
-
     <select id="searchAmectCount" parameterType="HashMap" resultType="long">
-        SELECT COUNT (*)
+        SELECT COUNT(*)
         FROM tb_amect a
         JOIN tb_amect_type `at` ON a.type_id = `at`.id
         JOIN tb_user u ON u.id = a.user_id
@@ -65,6 +64,38 @@
             AND a.`status` = #{status}
         </if>
     </select>
+    <insert id="insert" parameterType="com.example.emos.api.db.pojo.TbAmect">
+        INSERT INTO tb_amect
+        SET uuid = #{uuid},
+            user_id = #{userId},
+            amount = #{amount},
+            type_id = #{typeId},
+            reason = #{reason},
+            status = 1
+    </insert>
+    <select id="searchById" parameterType="int" resultType="HashMap">
+        SELECT uuid,
+               user_id AS userId,
+               amount,
+               type_id AS typeId,
+               reason
+        FROM tb_amect
+        WHERE id = #{id}
+    </select>
+    <update id="update" parameterType="HashMap">
+        UPDATE tb_amect
+        SET amount = #{amount},
+            type_id = #{typeId},
+            reason = #{reason}
+        WHERE id = #{id} AND status != 2
+    </update>
+    <delete id="deleteAmectByIds">
+        DELETE FROM tb_amect
+        WHERE status !=2 AND id IN
+        <foreach collection="array" open="(" separator="," close=")" item="one">
+            #{one}
+        </foreach>
+    </delete>
 
 
 </mapper>
