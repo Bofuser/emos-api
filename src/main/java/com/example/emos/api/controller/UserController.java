@@ -167,6 +167,7 @@ public class UserController {
         //通过从前端返回的page和length算出start的值，start表示查询页数从第几条开始
         int page = form.getPage();
         int length = form.getLength();
+        //计算起始页面
         int start = (page - 1) * length;
         /**
          * 将form中的数据转换成HashMap,封装到param中

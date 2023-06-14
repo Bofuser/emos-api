@@ -2,6 +2,9 @@ package com.example.emos.api.exception;
 
 import lombok.Data;
 
+/**
+ * 定义emos项目中遇到的异常信息，响应状态码和信息，用于处理业务中遇到的异常
+ */
 @Data
 public class EmosException extends RuntimeException {
     private String msg;

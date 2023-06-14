@@ -31,6 +31,18 @@ public interface TbAmectDao {
 
     public int deleteAmectByIds (Integer[] ids);
 
+    /**
+     * 查询罚款记录（一般为一条记录）
+     * @param param
+     * @return
+     */
+    public HashMap searchAmectByCondition(HashMap param);
 
+    /**
+     * 创建了微信支付订单后，给它设置微信支付订单Id
+     * @param param
+     * @return
+     */
+    public int updatePrepayId(HashMap param);
 
 }

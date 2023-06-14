@@ -172,11 +172,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public PageUtils searchUserByPage(HashMap param) {
 
-        //将数据库中根据条件param参数查询的员工数据保存到list中，list为前端页面的展示条数
+        //将数据库中根据条件param参数查询的员工数据保存到list中，list为前端页面的展示条数，list由前端数据库获得
         ArrayList<HashMap> list = userDao.searchUserByPage(param);
         //根据条件param查找的用户总条数count，count 通过数据库查询得到总条数
         long count = userDao.searchUserCount(param);
+        //start 是由 controller中计算得出的，将其存储在param中
         int start = (Integer) param.get("start");
+        //length 长度由前端JSON传输过来
         int length = (Integer) param.get("length");
         //将所有的查询数据信息封装成pageUtils返回出去
         PageUtils pageUtils = new PageUtils(list, count, start, length);

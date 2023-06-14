@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ExceptionAdvice {
 
+    /**
+     * 用于处理后端、业务等异常
+     * @param e
+     * @return
+     */
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
@@ -39,6 +44,11 @@ public class ExceptionAdvice {
         return json.toString();
     }
 
+    /**
+     * 用于处理未登录异常，NotLoginException 是 saToken 框架中的异常管理信息
+     * @param e
+     * @return
+     */
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(NotLoginException.class)

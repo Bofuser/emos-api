@@ -96,6 +96,23 @@
             #{one}
         </foreach>
     </delete>
+    <select id ="searchAmectByCondition" parameterType="HashMap" resultType="HashMap">
+        SELECT uuid,
+               amount,
+               prepay_id AS prepayId,
+               `status`
+        FROM tb_amect
+        WHERE id = #{amectId}
+        AND user_id = #{userId}
+        <if test="status!=null">
+            AND `status` = #{status}
+        </if>
+    </select>
+    <update id="updatePrepayId" parameterType="HashMap">
+        UPDATE tb_amect
+        SET prepay_id = #{prepayId}
+        WHERE id = #{amectId} AND status = 1
+    </update>
 
 
 </mapper>

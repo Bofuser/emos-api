@@ -86,6 +86,7 @@ springdoc:
   swagger-ui:
     # 修改Swagger UI路径
     path: /swagger-ui.html
+    # 这个选项是用来禁用默认的 swagger api文档的路径，其作用是提高api文档的安全性
     disable-swagger-default-url: on
 tencent:
   cloud:
@@ -99,12 +100,17 @@ tencent:
     secretKey: b3ca1c8c6a163dff26c3a25a7eee3e3bcd47cf40a533afaa2e97137797977ad6
     expire: 86400
 wx:
-  app-id: wx825704ef7988dc61
-  app-secret: 68baa87b40a37fb96cd35c18200ef6e3
+#  app-id: wx825704ef7988dc61
+#  app-secret: 68baa87b40a37fb96cd35c18200ef6e3
+  app-id: wx4cb8e9621950da45
+  app-secret: 86c4ecfa6be49444ab9b2e9c1490b5aa
+  mch-id: 1526972031
+  key: 5879a218f67f46a5aad75753a132ff3d
+  cert-path: E:/code/IdeaProjects/emos/apiclient_cert.p12
 
 emos:
   code: 46B83068776F9BEC
-  tcode: "061547"
+  tcode: "135287"
   recieveNotify: http://192.168.111.1:8090/emos-api/meeting/recieveNotify
 
 workflow:

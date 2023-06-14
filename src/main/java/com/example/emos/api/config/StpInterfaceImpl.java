@@ -8,13 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Component
+
+/**
+ * 	Sa-Token的配置类，用于获取用户权限和角色
+ */
+@Component  // 保证此类被SpringBoot扫描，完成Sa-Token的自定义权限验证扩展
 public class StpInterfaceImpl implements StpInterface {
     @Autowired
     private TbUserDao userDao;
 
     /**
-     * 返回一个用户所拥有的权限集合
+     * 调用数据库查询用户的权限，将用户的权限存储到 List 中， 然后就可以使用注解进行权限校验了
+     * 返回一个用户所拥有的权限集合。如返回一个{ROOT, AMECT:SELECT}
      */
     @Override
     public List<String> getPermissionList(Object loginId, String loginKey) {
@@ -28,6 +33,7 @@ public class StpInterfaceImpl implements StpInterface {
 
     /**
      * 返回一个用户所拥有的角色标识集合
+     * 如 经理、部门主管等角色
      */
     @Override
     public List<String> getRoleList(Object loginId, String loginKey) {

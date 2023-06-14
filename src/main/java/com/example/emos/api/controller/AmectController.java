@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 @RestController
-@RequestMapping
+@RequestMapping("/amect")
 @Tag(name = "AmectController", description = "罚款功能web接口")
 @Slf4j
 public class AmectController {

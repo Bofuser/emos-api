@@ -6,6 +6,9 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * 	线程池配置类，用于执行异步任务
+ */
 @Configuration
 public class ThreadPoolConfig {
 

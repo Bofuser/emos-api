@@ -13,6 +13,9 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * XssFilter拦截请求后会调用这个类做XSS转义
+ */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);

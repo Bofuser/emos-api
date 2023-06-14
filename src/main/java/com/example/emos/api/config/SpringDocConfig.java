@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
+
+/**
+ * 该项目没有使用 swagger 框架，使用的是 SpringDoc，但后面打开的网站是swagger框架
+ */
 @Configuration
 @OpenAPIDefinition(
         info = @Info(

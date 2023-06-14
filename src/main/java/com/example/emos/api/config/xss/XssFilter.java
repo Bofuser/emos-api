@@ -4,6 +4,11 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+
+
+/**
+ * 过滤器，用于拦截 Http 请求
+ */
 @WebFilter(urlPatterns = "/*")
 public class XssFilter implements Filter {
     @Override
