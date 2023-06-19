@@ -163,6 +163,9 @@ public class AmectController {
 
     }
 
+
+
+
     /**
      * 付款成功后接收微信平台发送过来的付款通知
      * @param request
@@ -226,5 +229,29 @@ public class AmectController {
         }
 
     }
+
+
+
+    @PostMapping("/searchNativeAmectPayResult")
+    @Operation(summary = "查询Native支付罚款订单结果")
+    @SaCheckLogin
+    public R searchNativeAmectPayResult(@Valid @RequestBody SearchNativeAmectPayResultForm form){
+
+        //获取用户的userId
+        int userId = StpUtil.getLoginIdAsInt();
+        //获取用户的订单信息
+        int amectId = form.getAmectId();
+        HashMap param = new HashMap(){{
+
+            put("amectId", amectId);
+            put("userId", userId);
+            put("status", 1);
+
+        }};
+        amectService.searchNativeAmectPayResult(param);
+        return R.ok();
+
+    }
+
 
 }
