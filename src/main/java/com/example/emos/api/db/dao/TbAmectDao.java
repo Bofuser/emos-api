@@ -45,4 +45,19 @@ public interface TbAmectDao {
      */
     public int updatePrepayId(HashMap param);
 
+    /**
+     *  付款成功后修改罚款状态
+     * @param param
+     * @return
+     */
+    public int updateStatus(HashMap param);
+
+    /**
+     * 查询用户的uuid
+     * @param uuid
+     * @return
+     */
+    public int searchUserIdByUUID(String uuid);
+
+
 }

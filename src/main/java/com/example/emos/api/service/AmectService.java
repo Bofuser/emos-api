@@ -17,4 +17,12 @@ public interface AmectService {
     public int update (HashMap param);
 
     public int deleteAmectByIds(Integer[] ids);
+
+    public String createNativeAmectPayOrder(HashMap param);
+
+    public int updateStatus(HashMap param);
+
+    public int searchUserIdByUUID(String uuid);
+
+    public void searchNativeAmectPayResult(HashMap param);
 }

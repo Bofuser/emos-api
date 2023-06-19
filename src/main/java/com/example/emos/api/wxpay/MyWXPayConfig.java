@@ -6,9 +6,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.*;
 
-/**
- * 微信支付配置文件
- */
 @Component
 public class MyWXPayConfig extends WXPayConfig {
     @Value("${wx.app-id}")

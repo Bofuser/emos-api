@@ -96,11 +96,11 @@
             #{one}
         </foreach>
     </delete>
-    <select id ="searchAmectByCondition" parameterType="HashMap" resultType="HashMap">
+    <select id="searchAmectByCondition" parameterType="HashMap" resultType="HashMap">
         SELECT uuid,
-               amount,
-               prepay_id AS prepayId,
-               `status`
+        amount,
+        prepay_id AS prepayId,
+        `status`
         FROM tb_amect
         WHERE id = #{amectId}
         AND user_id = #{userId}
@@ -113,6 +113,16 @@
         SET prepay_id = #{prepayId}
         WHERE id = #{amectId} AND status = 1
     </update>
+    <update id="updateStatus" parameterType="HashMap">
+        UPDATE tb_amect
+        SET status = #{status}
+        WHERE uuid = #{uuid}
+    </update>
+    <select id = "searchUserIdByUUID" parameterType="String" resultType="Integer">
+        SELECT user_id AS userId
+        FROM tb_amect
+        WHERE uuid = #{uuid}
+    </select>
 
 
 </mapper>

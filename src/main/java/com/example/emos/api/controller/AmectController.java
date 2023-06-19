@@ -10,20 +10,30 @@ import com.example.emos.api.common.util.PageUtils;
 import com.example.emos.api.common.util.R;
 import com.example.emos.api.controller.form.*;
 import com.example.emos.api.db.pojo.TbAmect;
-import com.example.emos.api.service.impl.AmectService;
+import com.example.emos.api.service.impl.AmectServiceImpl;
+import com.example.emos.api.websocket.webSocketService;
+import com.example.emos.api.wxpay.WXPayUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/amect")
@@ -32,7 +42,10 @@ import java.util.HashMap;
 public class AmectController {
 
     @Autowired
-    private AmectService amectService;
+    private AmectServiceImpl amectService;
+
+    @Value("${wx.key}")
+    private String key;
 
 
     @PostMapping("/searchAmectByPage")
@@ -131,5 +144,87 @@ public class AmectController {
 
     }
 
+    @PostMapping("/createNativeAmectPayOrder")
+    @Operation(summary = "创建Native支付罚款订单")
+    @SaCheckLogin
+    public R createNativeAmectPayOrder(@Valid @RequestBody createNativeAmectPayOrderForm form){
+
+        int userId = StpUtil.getLoginIdAsInt();
+        int amectId = form.getAmectId();
+        //封装 amectId 和  userId 用于查询微信支付订单
+        HashMap param = new HashMap(){{
+            put("amectId", amectId);
+            put("userId", userId);
+        }};
+
+        //生成的支付二维码以 Base64编码返回， Base64编码将二进制数据转换为可打印字符串
+        String qrCodeBase64 = amectService.createNativeAmectPayOrder(param);
+        return R.ok().put("qrCodeBase64", qrCodeBase64);
+
+    }
+
+    /**
+     * 付款成功后接收微信平台发送过来的付款通知
+     * @param request
+     * @param response
+     */
+    @Operation(summary = "接收消息通知")
+    @RequestMapping("/recieveMessage")
+    public void recieveMessage(HttpServletRequest request, HttpServletResponse response)throws Exception{
+
+        request.setCharacterEncoding("utf-8");
+        Reader reader = request.getReader();
+        BufferedReader buffer = new BufferedReader(reader);
+        String line = buffer.readLine();
+        StringBuffer temp = new StringBuffer();
+        while (line != null) {
+            temp.append(line);
+            line = buffer.readLine();
+        }
+        buffer.close();
+        reader.close();
+        String xml = temp.toString();
+
+        //利用数字证书验证收到的响应内容，避免有人伪造付款结果发送给Web方法。
+        if (WXPayUtil.isSignatureValid(xml, key)) {
+            Map<String, String> map = WXPayUtil.xmlToMap(temp.toString());
+            String resultCode = map.get("result_code");
+            String returnCode = map.get("return_code");
+            //如果微信那里返回的状态码为 SUCCESS
+            if ("SUCCESS".equals(resultCode) && "SUCCESS".equals(returnCode)) {
+                //out_trade_no这个为商品订单ID，也是罚款单的UUID
+                String outTradeNo = map.get("out_trade_no");    //罚款单UUID
+                //更新订单状态
+                HashMap param = new HashMap() {{
+                    put("status", 2);
+                    put("uuid", outTradeNo);
+                }};
+                //获取修改的返回结果，rows
+                int rows = amectService.updateStatus(param);
+                if (rows == 1) {
+                    // 向前端页面推送付款结果
+                    //根据罚款单ID（uuid）查询用户ID
+                    int userId = amectService.searchUserIdByUUID(outTradeNo);
+                    //向用户推送结果
+                    webSocketService.sendInfo("收款成功", userId + "");
+                    //给微信平台返回响应，设置响应的格式为 XML格式
+                    response.setCharacterEncoding("utf-8");
+                    response.setContentType("application/xml");
+                    Writer writer = response.getWriter();
+                    BufferedWriter bufferedWriter = new BufferedWriter(writer);
+                    bufferedWriter.write("<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>");
+                    bufferedWriter.close();
+                    writer.close();
+                } else {
+                    log.error("更新订单状态失败");
+                    response.sendError(500, "更新订单状态失败");
+                }
+            }
+        } else{
+            log.error("数字签名异常");
+            response.sendError(500, "数字签名异常");
+        }
+
+    }
 
 }
