@@ -84,7 +84,8 @@
     </select>
     <update id="update" parameterType="HashMap">
         UPDATE tb_amect
-        SET amount = #{amount},
+        SET uuid = #{uuid},
+            amount = #{amount},
             type_id = #{typeId},
             reason = #{reason}
         WHERE id = #{id} AND status != 2

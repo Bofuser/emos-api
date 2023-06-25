@@ -95,14 +95,16 @@ public class UserController {
     public R login(@Valid @RequestBody LoginForm form){
         //将web端传来的form对象转换为json/object对象，然后通过toBean将其转换成HashMap值
         HashMap param = JSONUtil.parse(form).toBean(HashMap.class);
+        //用来查询后端是否有这个用户Id，返回成userId
         Integer userId = userService.login(param);
         //判断userId是否为空，将值保存到以R为数据类型中
         R r = R.ok().put("result", userId != null ? true : false);
+        //如果用户存在，则继续查询其权限和 token值 返回给前端
         if (userId != null) {
             //会话登录，并设置登陆的 userId
             //StpUtil.setLoginId(userId);
             StpUtil.login(userId);
-            //查询用户的权限列表，将返回的值保存到permission中
+            //查询用户的权限列表，将返回的值保存到permission中，该功能用于不同权限的人使用不同的功能
             Set<String> permissions = userService.searchUserPermissions(userId);
             /*
              * 因为新版的Chrome浏览器不支持前端Ajax的withCredentials，

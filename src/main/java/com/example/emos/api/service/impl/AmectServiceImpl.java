@@ -122,12 +122,19 @@ public class AmectServiceImpl implements AmectService {
                 WXPay wxPay = new WXPay(myWXPayConfig);
                 param.clear();
                 // 下面为请求参数
-                param.put("nonce_str", WXPayUtil.generateNonceStr());   //随机字符串
+                //	随机字符串:5K8264ILTKCH16CQ2502SI8ZNMTM67VS
+                param.put("nonce_str", WXPayUtil.generateNonceStr());
+                //商品订单描述：罚款订单
                 param.put("body","缴纳罚款");
+                // 商品订单号：20150806125346  UUID
                 param.put("out_trade_no", MapUtil.getStr(map, "uuid"));
+                //订单金额
                 param.put("total_fee", amount);
+                //终端IP
                 param.put("spbill_create_ip", "127.0.0.1");
+                //通知地址: 这里设置了内网渗透
                 param.put("notify_url", "http://s10.s100.vip:17357/emos-api/amect/recieveMessage");
+                //交易类型
                 param.put("trade_type", "NATIVE");
                 //生成数字签名字符串
                 String sign = WXPayUtil.generateSignature(param, myWXPayConfig.getKey());

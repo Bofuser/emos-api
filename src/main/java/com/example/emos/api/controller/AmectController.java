@@ -88,14 +88,21 @@ public class AmectController {
 
         //初始化TbAmect列表，用来存储form信息
         ArrayList<TbAmect> list = new ArrayList<>();
+        //用于多个用户创建订单，根据创建的每个用户的ID来存储这些信息
         for(Integer userId : form.getUserId()){
             TbAmect amect = new TbAmect();
             //BigDecimal是 Java 中的一个精确的、任意精度的十进制数值类型。它用于进行高精度的数值计算，避免了浮点数计算中的精度损失问题。
+            //设置罚款金额
             amect.setAmount(new BigDecimal(form.getAmount()));
+            //设置罚款类型
             amect.setTypeId(form.getTypeId());
+            //设置罚款原因
             amect.setReason(form.getReason());
+            //设置用户 Id
             amect.setUserId(userId);
+            //设置UUID
             amect.setUuid(IdUtil.simpleUUID());
+            //在列表中添加 amect用户信息
             list.add(amect);
         }
 
@@ -127,6 +134,9 @@ public class AmectController {
 
         //将表单中的信息转换成哈希表信息
         HashMap param = JSONUtil.parse(form).toBean(HashMap.class);
+        //修改订单信息后，从新生成 uuid
+        param.put("uuid", IdUtil.simpleUUID());
+
         //将需要修改的表单信息传给数据库中
         int rows = amectService.update(param);
         //返回修改的表单信息
@@ -239,7 +249,7 @@ public class AmectController {
 
         //获取用户的userId
         int userId = StpUtil.getLoginIdAsInt();
-        //获取用户的订单信息
+        //获取用户的罚款单ID
         int amectId = form.getAmectId();
         HashMap param = new HashMap(){{
 
