@@ -46,6 +46,7 @@ public class UserServiceImpl implements UserService {
         //生成uuid
         String uuid = IdUtil.simpleUUID();
         //key是uuid，value的false代表该uuid没有被使用，防止该二维码被重复扫码
+        //redisTemplate.opsForValue()返回一个valueOperations对象，可以通过它用set、get等方法来操作redis中的字符串
         redisTemplate.opsForValue().set(uuid, false, 5, TimeUnit.MINUTES);
         //设置二维码大小信息
         QrConfig config = new QrConfig();
@@ -62,12 +63,18 @@ public class UserServiceImpl implements UserService {
         return map;
     }
 
+    /**
+     * 扫码登录功能
+     * @param code
+     * @param uuid
+     * @return
+     */
     @Override
     public boolean checkQrCode(String code, String uuid) {
-        //通过uuid查询userId是否存在，存在则表示用户已经登录
+        //查询redis中的uuid（映射值为userId）是否存在，通过uuid查询userId是否存在，存在则表示用户已经登录
         boolean bool = redisTemplate.hasKey(uuid);
         if (bool) {
-            //当用户登录时把uuid和code值写入Redis
+            //当用户登录时把uuid和code值写入Redis，openId 相当于身份验证和授权的token值
             String openId = getOpenId(code);
             long userId = userDao.searchIdByOpenId(openId);
             redisTemplate.opsForValue().set(uuid, userId);
@@ -76,7 +83,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 用于把code临时授权转换成OpenId
+     * 用于把 code临时授权转换成 OpenId
      * @param code
      * @return
      */
@@ -96,6 +103,11 @@ public class UserServiceImpl implements UserService {
         return openId;
     }
 
+    /**
+     * 微信登录
+     * @param uuid
+     * @return
+     */
     @Override
     public HashMap wechatLogin(String uuid) {
         HashMap map = new HashMap();
@@ -116,24 +128,43 @@ public class UserServiceImpl implements UserService {
         return map;
     }
 
+    /**
+     * 查询用户权限
+     * @param userId
+     * @return
+     */
     @Override
     public Set<String> searchUserPermissions(int userId) {
         Set<String> permissions = userDao.searchUserPermissions(userId);
         return permissions;
     }
 
+    /**
+     * 查询用户Id
+     * @param userId
+     * @return
+     */
     @Override
     public HashMap searchById(int userId) {
         HashMap map = userDao.searchById(userId);
         return map;
     }
 
+    /**
+     * 查询用户总数
+     * @param userId
+     * @return
+     */
     @Override
     public HashMap searchUserSummary(int userId) {
         HashMap map = userDao.searchUserSummary(userId);
         return map;
     }
 
+    /**
+     * 查询所有用户记录
+     * @return
+     */
     @Override
     public ArrayList<HashMap> searchAllUser() {
         ArrayList<HashMap> list = userDao.searchAllUser();
@@ -186,6 +217,11 @@ public class UserServiceImpl implements UserService {
         return pageUtils;
     }
 
+    /**
+     * 新增用户
+     * @param user
+     * @return
+     */
     @Override
     public int insert(TbUser user) {
 
@@ -194,6 +230,11 @@ public class UserServiceImpl implements UserService {
         return rows;
     }
 
+    /**
+     * 修改用户
+     * @param param
+     * @return
+     */
     @Override
     public int update(HashMap param) {
         //修改成功后返回rows=1
@@ -201,6 +242,11 @@ public class UserServiceImpl implements UserService {
         return rows;
     }
 
+    /**
+     * 删除用户，通过用户 ids
+     * @param ids
+     * @return
+     */
     @Override
     public int deleteUserByIds(Integer[] ids) {
         //删除用户成功后返回rows数
@@ -208,6 +254,11 @@ public class UserServiceImpl implements UserService {
         return rows;
     }
 
+    /**
+     * 查询用户的角色
+     * @param userId
+     * @return
+     */
     @Override
     public ArrayList<String> searchUserRoles(int userId) {
 
@@ -216,6 +267,11 @@ public class UserServiceImpl implements UserService {
         return list;
     }
 
+    /**
+     * 查询用户和所属的用户部门
+     * @param userId
+     * @return
+     */
     @Override
     public HashMap searchNameAndDept(int userId) {
 

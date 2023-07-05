@@ -30,7 +30,9 @@ spring:
     host: localhost
     port: 6379
     password: abc123456
+    # Redis的Java客户端实现，通过 Jedis 对 Redis 进行操作
     jedis:
+      #Redis 连接池配置
       pool:
         max-active: 1000
         max-wait: -1ms
@@ -110,8 +112,9 @@ wx:
 
 emos:
   code: 46B83068776F9BEC
-  tcode: "703151"
+  tcode: "563481"
   recieveNotify: http://192.168.111.1:8090/emos-api/meeting/recieveNotify
 
+# 工作流项目的url地址
 workflow:
   url: http://192.168.111.1:9090/emos-workflow

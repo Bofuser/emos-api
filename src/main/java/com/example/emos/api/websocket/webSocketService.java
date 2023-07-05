@@ -32,7 +32,6 @@ public class webSocketService {
     public void onOpen(Session session) {
     }
 
-
     /**
      * 链接关闭调用的方法
      * @param session
@@ -44,7 +43,6 @@ public class webSocketService {
             sessionMap.remove(userId);
         }
     }
-
 
     /**
      * 接收消息
@@ -84,10 +82,6 @@ public class webSocketService {
         }
 
         sendInfo("ok", userId);
-
-
-
-
     }
 
     /**
@@ -118,8 +112,6 @@ public class webSocketService {
         } catch (Exception e){
             log.error("执行异常", e);
         }
-
-
     }
 
     @OnError

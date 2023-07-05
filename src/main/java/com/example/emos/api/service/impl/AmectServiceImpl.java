@@ -1,5 +1,6 @@
 package com.example.emos.api.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.extra.qrcode.QrCodeUtil;
 import cn.hutool.extra.qrcode.QrConfig;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,7 +103,7 @@ public class AmectServiceImpl implements AmectService {
 
 
     /**
-     * 用于创建微信支付订单
+     * 用于创建微信支付订单和生成支付二维码
      * @param param
      * @return
      */
@@ -111,13 +113,13 @@ public class AmectServiceImpl implements AmectService {
         int userId = MapUtil.getInt(param, "userId");
         int amectId = MapUtil.getInt(param, "amectId");
 
-        //根据罚款单ID和用户ID查询罚款单记录
+        //根据罚款单ID和用户ID查询罚款单记录, param{ userId, amectId }
         HashMap map = amectDao.searchAmectByCondition(param);
         if(map != null && map.size() > 0){
             //次代码的作用是将Map中的字符串类型的金额转换为整型，并将其乘以100。这种操作通常用于将金额从元转换为分，或者从分转换为元。
             String amount = new BigDecimal(MapUtil.getStr(map, "amount")).multiply(new BigDecimal("100")).intValue() + "";
 
-            //用于捕获微信支付的错误
+            //用于获取微信支付订单ID和生成支付二维码
             try{
                 WXPay wxPay = new WXPay(myWXPayConfig);
                 param.clear();
@@ -132,7 +134,7 @@ public class AmectServiceImpl implements AmectService {
                 param.put("total_fee", amount);
                 //终端IP
                 param.put("spbill_create_ip", "127.0.0.1");
-                //通知地址: 这里设置了内网渗透
+                //通知地址: 这里设置了内网渗透，穿透地址为：http://s10.s100.vip:17357
                 param.put("notify_url", "http://s10.s100.vip:17357/emos-api/amect/recieveMessage");
                 //交易类型
                 param.put("trade_type", "NATIVE");
@@ -141,11 +143,11 @@ public class AmectServiceImpl implements AmectService {
                 param.put("sign", sign);
                 //创建支付订单, 用于扫码支付
                 Map<String,String> result = wxPay.unifiedOrder(param);
-                //微信订单ID，由微信支付平台返回的 prepayId
+                //微信支付订单ID，由微信支付平台返回的 prepayId
                 String prepayId = result.get("prepay_id");
                 // 支付链接，需要生成二维码让手机扫码
                 String codeUrl = result.get("code_url");
-                //判断获取的微信订单ID是否存在
+                //判断获取的微信订单ID是否存在,在DAO层中有个status变量用来判断订单是否已支付，支付过的（status=2）则不在生成 prepayId
                 if(prepayId != null){
                     param.clear();
                     param.put("prepayId", prepayId);
@@ -240,7 +242,7 @@ public class AmectServiceImpl implements AmectService {
                     //获取微信平台返回的交易状态码
                     String tradeState = result.get("trade_state");
                     //查询订单支付成功，修改数据状态
-                    if("SUCCESS".equals(returnCode)){
+                    if("SUCCESS".equals(tradeState)){
                         //更新订单状态
                         amectDao.updateStatus(new HashMap(){{
                             put("uuid",uuid);
@@ -259,5 +261,69 @@ public class AmectServiceImpl implements AmectService {
 
     }
 
+    /**
+     * 用于查询罚款表单，图视化
+     * @param param
+     * @return
+     */
+    @Override
+    public HashMap searchChart(HashMap param) {
 
+        //查询罚款类型
+        ArrayList<HashMap> chart_1 = amectDao.searchChart_1(param);
+        //查询罚款金额区间
+        ArrayList<HashMap> chart_2 = amectDao.searchChart_2(param);
+        //查询罚款付款人数和未付款人数
+        ArrayList<HashMap> chart_3 = amectDao.searchChart_3(param);
+        param.clear();
+        int year = DateUtil.year(new Date());
+        param.put("year", year);
+        // 获取未付款名单
+        param.put("status", 1);
+        ArrayList<HashMap> list_1 = amectDao.searchChart_4(param);
+        // 获取已付款人员名单
+        param.replace("status", 2);
+        ArrayList<HashMap> list_2 = amectDao.searchChart_4(param);
+
+        //下面代码中（for循环这里），主要作用为：预先创建一个包含所有月份的 HashMap 列表，并初始化记录数为 0，
+        // 以便在后续查询中将数据填充到这个列表中
+        ArrayList<HashMap> chart_4_1 = new ArrayList<>();
+        ArrayList<HashMap> chart_4_2 = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            HashMap map = new HashMap();
+            map.put("month", i);
+            map.put("ct", 0);
+            chart_4_1.add(map);
+            //map.clone 是为了保证每个列表中的 HashMap 对象是独立的拷贝，而不是共享同一个对象
+            chart_4_2.add((HashMap) map.clone());
+        }
+        //将list_1（未付款）的记录数按照月份逐个拷贝过去
+        list_1.forEach(one -> {
+            chart_4_1.forEach(temp -> {
+                if (MapUtil.getInt(one, "month") == MapUtil.getInt(temp, "month")) {
+                    temp.replace("ct", MapUtil.getInt(one, "ct"));
+                }
+            });
+        });
+        //将list_2（已付款）的记录数按照月份逐个拷贝过去
+        list_2.forEach(one -> {
+            chart_4_2.forEach(temp -> {
+                if (MapUtil.getInt(one, "month") == MapUtil.getInt(temp, "month")) {
+                    temp.replace("ct", MapUtil.getInt(one, "ct"));
+                }
+            });
+        });
+
+        /**
+         * 将各个图表封装成HashMap返回到控制层中
+         */
+        HashMap map = new HashMap() {{
+            put("chart_1", chart_1);
+            put("chart_2", chart_2);
+            put("chart_3", chart_3);
+            put("chart_4_1", chart_4_1);
+            put("chart_4_2", chart_4_2);
+        }};
+        return map;
+    }
 }

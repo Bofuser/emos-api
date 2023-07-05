@@ -62,7 +62,7 @@ public class ApprovalController {
         //获取操作的用户信息，将用户信息传到userId
         int userId = StpUtil.getLoginIdAsInt();
         param.put("userId", userId);
-        //将从TbUser数据库中查询到的角色权限值封装成role,存储到HashMap中
+        //将从TbUser数据库中查询到的角色权限值封装成role,存储到HashMap中,用于HttpRequest请求发送给工作流项目中的角色权限
         param.put("role", userService.searchUserRoles(userId));
         //将从工作流中查询的结果存储封装到PageUtils工具类中
         PageUtils pageUtils = approvalService.searchTaskByPage(param);
@@ -70,6 +70,11 @@ public class ApprovalController {
     }
 
 
+    /**
+     * 获取 会议审批内容和BPMN实时进度图
+     * @param form
+     * @return
+     */
     @PostMapping("/searchApprovalContent")
     @Operation(summary = "查询任务详情")
     @SaCheckPermission(value = {"WORKFLOW:APPROVAL", "FILE:ARCHIVE"}, mode = SaMode.OR)
@@ -94,7 +99,7 @@ public class ApprovalController {
     @SaCheckPermission(value = {"WORKFLOW:APPROVAL", "FILE:ARCHIVE"}, mode = SaMode.OR)
     public void searchApprovalBpmn(String instanceId, HttpServletResponse response){
 
-        //判断instanceId不能为空
+        //判断instanceId不能为空，instanceId 为工作流实例ID
         if(StrUtil.isBlankIfStr(instanceId)){
             throw new EmosException("instanceId不能为空");
         }
@@ -106,7 +111,7 @@ public class ApprovalController {
             put("instanceId", instanceId);
 
         }};
-        //传送url到http响应
+        //传送url到http响应，获取响应数据
         String url = workflow + "/workflow/searchApprovalBpmn";
         HttpResponse resp = HttpRequest.post(url).header("Content-Type", "application/json")
                 .body(JSONUtil.toJsonStr(param)).execute();
@@ -119,23 +124,22 @@ public class ApprovalController {
                     BufferedInputStream bin = new BufferedInputStream(in);
                     OutputStream out = response.getOutputStream();
                     BufferedOutputStream bout = new BufferedOutputStream(out)
-
-                    ) {
-
+            ) {
                 IOUtils.copy(bin,bout);
-
             } catch (Exception e) {
-
                 log.error("执行异常", e);
-
             }
-
         } else {
             log.error("获取工作流BPMN图失败");
             throw new EmosException("获取工作流BPMN图失败");
         }
     }
 
+    /**
+     * 审批查询任务
+     * @param form
+     * @return
+     */
     @PostMapping("/approvalTask")
     @Operation(summary = "审批任务")
     @SaCheckPermission(value = {"WORKFLOW:APPROVAL"}, mode = SaMode.OR)
@@ -146,7 +150,5 @@ public class ApprovalController {
         return R.ok();
 
     }
-
-
 
 }

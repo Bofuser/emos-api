@@ -177,7 +177,7 @@ public class AmectController {
 
 
     /**
-     * 付款成功后接收微信平台发送过来的付款通知
+     * 付款成功后接收微信平台发送过来的付款通知，向微信平台发送付款成功信息
      * @param request
      * @param response
      */
@@ -198,8 +198,9 @@ public class AmectController {
         reader.close();
         String xml = temp.toString();
 
-        //利用数字证书验证收到的响应内容，避免有人伪造付款结果发送给Web方法。
+        //利用数字证书验证收到的响应内容，避免有人伪造付款结果发送给Web方法。微信返回支付成功信息
         if (WXPayUtil.isSignatureValid(xml, key)) {
+            //接收微信返回来的 resultCode和returnCode，不仅只有这两个信息，还有out_trade_no、sign等等很多，我们只拿这两个需要的
             Map<String, String> map = WXPayUtil.xmlToMap(temp.toString());
             String resultCode = map.get("result_code");
             String returnCode = map.get("return_code");
@@ -225,6 +226,7 @@ public class AmectController {
                     response.setContentType("application/xml");
                     Writer writer = response.getWriter();
                     BufferedWriter bufferedWriter = new BufferedWriter(writer);
+                    //接收到后发给微信平台的信息，return_code和 return_msg，表示接收到微信平台返回的成功信息，由我们这边发送给微信。
                     bufferedWriter.write("<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>");
                     bufferedWriter.close();
                     writer.close();
@@ -252,16 +254,31 @@ public class AmectController {
         //获取用户的罚款单ID
         int amectId = form.getAmectId();
         HashMap param = new HashMap(){{
-
             put("amectId", amectId);
             put("userId", userId);
             put("status", 1);
-
         }};
         amectService.searchNativeAmectPayResult(param);
         return R.ok();
 
     }
 
+
+    /**
+     * 将查询报告生成图表
+     * @param form
+     * @return
+     */
+    @PostMapping("/searchChart")
+    @Operation(summary = "查询Chart图表")
+    @SaCheckPermission(value = {"ROOT", "AMECT:SELECT"}, mode = SaMode.OR)
+    public R searchChart(@Valid @RequestBody SearchChartForm form) {
+
+        HashMap param = JSONUtil.parse(form).toBean(HashMap.class);
+        //服务层中获得的图表
+        HashMap map = amectService.searchChart(param);
+        //发送给 前端页面
+        return R.ok(map);
+    }
 
 }

@@ -59,5 +59,38 @@ public interface TbAmectDao {
      */
     public int searchUserIdByUUID(String uuid);
 
+    /**
+     * 查询图表，有4个类型图表
+     * @param param
+     * @return
+     */
+    /**
+     * 这个用来查询罚款类型的，将罚款类型作为一个分类
+     * @param param
+     * @return
+     */
+    public ArrayList<HashMap> searchChart_1(HashMap param);
+
+    /**
+     * 这个函数是用来查询罚款金额的区间
+     * @param param
+     * @return
+     */
+    public ArrayList<HashMap> searchChart_2(HashMap param);
+
+    /**
+     * 这个函数是查询已付款和未付款得记录数
+     * @param param
+     * @return
+     */
+    public ArrayList<HashMap> searchChart_3(HashMap param);
+
+    /**
+     * 这个函数是查询特定年份和状态下的每个月份的记录数
+     * @param param
+     * @return
+     */
+    public ArrayList<HashMap> searchChart_4(HashMap param);
+
 
 }
