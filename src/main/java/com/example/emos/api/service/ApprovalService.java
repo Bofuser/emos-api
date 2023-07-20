@@ -11,4 +11,6 @@ public interface ApprovalService {
     public HashMap searchApprovalContent(HashMap param);
 
     public void approvalTask(HashMap param);
+
+    public void archiveTask(HashMap param);
 }

@@ -122,4 +122,28 @@ public class ApprovalServiceImpl implements ApprovalService {
         }
     }
 
+    /**
+     * 归档任务
+     * @param param
+     */
+    @Override
+    public void archiveTask(HashMap param) {
+
+        param.put("code",code);
+        param.put("tcode",tcode);
+
+        //向工作流发起请求
+        String url = workflow + "/workflow/archiveTask";
+        HttpResponse resp = HttpRequest.post(url).header("Content-Type", "application/json")
+                .body(JSONUtil.toJsonStr(param)).execute();
+
+        //判断响应是否成功
+        if(resp.getStatus() != 200){
+            log.error(resp.body());
+            throw new EmosException("调用工作流审批异常");
+
+        }
+
+    }
+
 }

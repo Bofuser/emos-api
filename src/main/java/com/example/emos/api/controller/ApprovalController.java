@@ -10,6 +10,7 @@ import cn.hutool.json.JSONUtil;
 import com.example.emos.api.common.util.PageUtils;
 import com.example.emos.api.common.util.R;
 import com.example.emos.api.controller.form.ApprovalTaskForm;
+import com.example.emos.api.controller.form.ArchiveTaskForm;
 import com.example.emos.api.controller.form.SearchApprovalContentForm;
 import com.example.emos.api.controller.form.SearchTaskByPageForm;
 import com.example.emos.api.exception.EmosException;
@@ -147,6 +148,31 @@ public class ApprovalController {
 
         HashMap param = JSONUtil.parse(form).toBean(HashMap.class);
         approvalService.approvalTask(param);
+        return R.ok();
+
+    }
+
+    /**
+     * 归档任务
+     * @param form
+     * @return
+     */
+    @PostMapping("/archiveTask")
+    @Operation(summary = "归档任务")
+    @SaCheckPermission(value = {"FILE:ARCHIVE"})
+    public R archiveTask(@Valid @RequestBody ArchiveTaskForm form){ //form{taskId, file}
+
+        if (!JSONUtil.isJsonArray(form.getFiles())){
+            return R.error("file不是JSON数组");
+        }
+
+        HashMap param = new HashMap(){{
+            put("taskId",form.getTaskId());
+            put("file",form.getFiles());
+            put("userId",StpUtil.getLoginIdAsInt());
+        }};
+
+        approvalService.archiveTask(param);
         return R.ok();
 
     }
